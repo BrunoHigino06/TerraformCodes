@@ -4,6 +4,8 @@ provider "aws" {
 
 resource "aws_network_acl" "main" {
   vpc_id = "vpc-cdadfab5"
+  subnet_ids = ["subnet-b8b56ee4"]
+
 
   egress {
     protocol   = "tcp"
