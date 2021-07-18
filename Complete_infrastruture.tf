@@ -11,6 +11,8 @@ resource "aws_vpc" "TesteVPC" {
 }
 
 # Creation of a Subnet
+
+#Frontend Private Subnet
 resource "aws_subnet" "FrontEndProd" {
   cidr_block = "10.0.1.0/24"
   vpc_id = aws_vpc.TesteVPC.id
@@ -22,6 +24,7 @@ resource "aws_subnet" "FrontEndProd" {
   ]
 }
 
+#Backtend Private Subnet
 resource "aws_subnet" "BackEndProd" {
   cidr_block = "10.0.2.0/24"
   vpc_id = aws_vpc.TesteVPC.id
@@ -33,6 +36,7 @@ resource "aws_subnet" "BackEndProd" {
   ]
 }
 
+#NAT Gateway Public Subnet
 resource "aws_subnet" "NATSubnet" {
   cidr_block = "10.0.3.0/24"
   vpc_id = aws_vpc.TesteVPC.id
@@ -59,11 +63,29 @@ resource "aws_internet_gateway" "InternetGW" {
 resource "aws_nat_gateway" "NAT_GW" {
   subnet_id = aws_subnet.NATSubnet.id
   allocation_id = aws_internet_gateway.InternetGW.id
-
   depends_on = [
     aws_internet_gateway.InternetGW
     
   ]
+}
+
+#Route table for route the internet in private subnets
+resource "aws_route_table" "InternetRouteTable" {
+  vpc_id = aws_vpc.TesteVPC.id
+  route {
+    cidr_block = "10.0.1.0/24"
+    nat_gateway_id = aws_nat_gateway.NAT_GW.id
+
+  }
+  route {
+    cidr_block = "10.0.2.0/24"
+    nat_gateway_id = aws_nat_gateway.NAT_GW.id
+
+  }
+  tags = {
+    "Name" = "PSubnets_to_Internet"
+  }
+  
 }
 
 
